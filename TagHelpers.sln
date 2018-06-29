@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kekonn.TagHelpers.Core", "TagHelpers\Kekonn.TagHelpers.Core.csproj", "{0635F43F-D0A1-4BA6-8C12-1AB39951CED3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kekonn.TagHelpers.Core.Assets", "Kekonn.TagHelpers.Core.Assets\Kekonn.TagHelpers.Core.Assets.csproj", "{8C589F11-12F9-4862-A763-3ED07889D4B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0635F43F-D0A1-4BA6-8C12-1AB39951CED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0635F43F-D0A1-4BA6-8C12-1AB39951CED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0635F43F-D0A1-4BA6-8C12-1AB39951CED3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C589F11-12F9-4862-A763-3ED07889D4B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C589F11-12F9-4862-A763-3ED07889D4B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C589F11-12F9-4862-A763-3ED07889D4B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C589F11-12F9-4862-A763-3ED07889D4B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

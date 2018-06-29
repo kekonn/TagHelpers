@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <Version>0.0.1</Version>
+    <Authors>kekonn</Authors>
+    <Description>A collection of asset tag helpers built by me</Description>
+    <Copyright>(c) 2018 - Kekonn</Copyright>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/bloodsplatter/TagHelpers/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/bloodsplatter/TagHelpers</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>netcore,asp,taghelper,taghelpers</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+</Project>
