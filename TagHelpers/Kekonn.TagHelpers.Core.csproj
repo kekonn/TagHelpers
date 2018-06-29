@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <StartupObject />
+    <Company />
+    <Authors>Kekonn</Authors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/bloodsplatter/TagHelpers</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Description>My personal collection of tag helpers for ASP .NET Core</Description>
+    <PackageId>Kekonn.TagHelpers.Core</PackageId>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <RootNamespace>Kekonn.TagHelpers.Core</RootNamespace>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/bloodsplatter/TagHelpers/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/bloodsplatter/TagHelpers</PackageProjectUrl>
+    <Copyright>(c) 2018 - Kekonn</Copyright>
+    <PackageTags>netcore,asp,taghelper,taghelpers</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.1" />
+  </ItemGroup>
+
+</Project>
