@@ -17,6 +17,8 @@ namespace Kekonn.TagHelpers.Core.Assets
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
 
+            if (_config.PerformScanPostConfigure) return; //we're out at this point, we'll do the rest after c onfigure
+
             _config.ResolveLibraries();
             _assets = new List<AssetDefinition>(_config.Assets);
             _isReady = true;
@@ -24,7 +26,15 @@ namespace Kekonn.TagHelpers.Core.Assets
 
         public void PostConfigure(string name, AssetStoreOptions options)
         {
-            throw new NotImplementedException();
+            if (options == null) throw new ArgumentNullException(nameof(options));
+
+            if (!_config.PerformScanPostConfigure) return;
+
+            _config.ResolveLibraries();
+            _config.Scan();
+                
+            _assets = new List<AssetDefinition>(_config.Assets);
+            _isReady = true;
         }
 
         private void EnsureReady()
@@ -37,7 +47,12 @@ namespace Kekonn.TagHelpers.Core.Assets
 
         public AssetDefinition this[AssetStoreKey key]
         {
-            get { return _assets.Single(a => a.AssetType == key.AssetType && a.AssetName.Equals(key.AssetName)); }
+            get
+            {
+                EnsureReady();
+
+                return _assets.Single(a => a.AssetType == key.AssetType && a.AssetName.Equals(key.AssetName));
+            }
         }
 
         public IEnumerable<AssetDefinition> Scripts

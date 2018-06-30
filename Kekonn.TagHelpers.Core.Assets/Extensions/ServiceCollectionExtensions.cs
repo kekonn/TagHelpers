@@ -23,6 +23,7 @@ namespace Kekonn.TagHelpers.Core.Assets.Extensions
 
             services.TryAddSingleton<IAssetStore, AssetStore>();
             services.Configure(options);
+            services.PostConfigure(options);
         }
     }
 }
