@@ -1,17 +1,19 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Extensions.Options;
 
 namespace Kekonn.TagHelpers.Core.Assets
 {
-    public sealed class AssetStore : IAssetStore
+    public sealed class AssetStore : IAssetStore, IConfigureOptions<AssetStoreOptions>,
+        IPostConfigureOptions<AssetStoreOptions>
     {
-        private bool _isReady = false;
-
-        private AssetStoreConfiguration _config;
         private List<AssetDefinition> _assets;
 
-        internal void Configure(AssetStoreConfiguration config)
+        private AssetStoreOptions _config;
+        private bool _isReady;
+
+        public void Configure(AssetStoreOptions config)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
 
@@ -20,14 +22,22 @@ namespace Kekonn.TagHelpers.Core.Assets
             _isReady = true;
         }
 
+        public void PostConfigure(string name, AssetStoreOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void EnsureReady()
+        {
+            if (!_isReady)
+                throw new InvalidOperationException("Please configure the AssetStore first.");
+        }
+
         #region IAssetStore
 
         public AssetDefinition this[AssetStoreKey key]
         {
-            get
-            {
-                return _assets.Where(a => a.AssetType == key.AssetType && a.AssetName.Equals(key.AssetName)).Single();
-            }
+            get { return _assets.Single(a => a.AssetType == key.AssetType && a.AssetName.Equals(key.AssetName)); }
         }
 
         public IEnumerable<AssetDefinition> Scripts
@@ -51,11 +61,5 @@ namespace Kekonn.TagHelpers.Core.Assets
         }
 
         #endregion
-
-        private void EnsureReady()
-        {
-            if (!_isReady)
-                throw new InvalidOperationException("Please configure the AssetStore first.");
-        }
     }
 }
