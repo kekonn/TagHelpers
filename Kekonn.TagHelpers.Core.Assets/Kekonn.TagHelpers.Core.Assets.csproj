@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>0.0.1</Version>
+    <Version>0.5.0</Version>
     <Authors>kekonn</Authors>
     <Description>A collection of asset tag helpers built by me</Description>
     <Copyright>(c) 2018 - Kekonn</Copyright>
