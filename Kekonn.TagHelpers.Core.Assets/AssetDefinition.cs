@@ -10,6 +10,16 @@ namespace Kekonn.TagHelpers.Core.Assets
         public string AssetLocation { get; private set; }
         public string AssetName { get; private set; }
 
+        public string SRIHash { get; set; }
+        public string MinifiedLocation { get; set; }
+        public bool MinifiedVersionAvailable
+        {
+            get
+            {
+                return !string.IsNullOrWhiteSpace(MinifiedLocation);
+            }
+        }
+
         public AssetDefinition(AssetType assetType, string assetLocation, string assetName)
         {
             AssetType = assetType;

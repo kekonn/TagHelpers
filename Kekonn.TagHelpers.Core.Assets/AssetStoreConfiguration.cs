@@ -2,125 +2,161 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.FileProviders;
 
 namespace Kekonn.TagHelpers.Core.Assets
 {
     public class AssetStoreConfiguration
     {
-        private const string LIB_ROOT = "~/lib";
+        private const string LIB_ROOT = "lib";
 
         private Dictionary<string, AssetDefinition> _definitionDictionary = new Dictionary<string, AssetDefinition>();
 
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly string _wwwroot;
 
-        public AssetStoreConfiguration(IHostingEnvironment hostingEnvironment)
+        internal IEnumerable<AssetDefinition> Assets
         {
-            _hostingEnvironment = hostingEnvironment ?? throw new ArgumentNullException(nameof(hostingEnvironment));
+            get
+            {
+                return _definitionDictionary.Values;
+            }
+        }
+
+        public AssetStoreConfiguration(string wwwRoot)
+        {
+            _wwwroot = string.IsNullOrWhiteSpace(wwwRoot) ? Environment.CurrentDirectory : wwwRoot;
         }
 
         #region Libraries
-        public AssetStoreConfiguration AddLibrary(string name)
+        public void AddLibrary(string name)
         {
-            return Add(new AssetDefinition(AssetType.Library, null, name));
+            Add(new AssetDefinition(AssetType.Library, null, name));
         }
 
-        public AssetStoreConfiguration AddLibraries(string[] libraries)
+        public void AddLibraries(string[] libraries)
         {
             foreach (var library in libraries)
             {
                 AddLibrary(library);
             }
-
-            return this;
         }
         #endregion
 
         #region Scripts
-        public AssetStoreConfiguration AddScript(string name, string location = null)
+        public void AddScript(string name, string location = null)
         {
-            return Add(new AssetDefinition(AssetType.Script, location ?? $"{LIB_ROOT}/{name}/", name));
+            Add(new AssetDefinition(AssetType.Script, location ?? $"{LIB_ROOT}/{name}/", name));
         }
         #endregion
 
         #region Stylesheets
-        public AssetStoreConfiguration AddStylesheet(string name, string location = null)
+        public void AddStylesheet(string name, string location = null)
         {
-            return Add(new AssetDefinition(AssetType.Stylesheet, location ?? $"{LIB_ROOT}/{name}/", name));
+            Add(new AssetDefinition(AssetType.Stylesheet, location ?? $"{LIB_ROOT}/{name}/", name));
         }
         #endregion
 
-        public AssetStoreConfiguration Scan(string location = null)
+        public void Scan(string location = null)
         {
             if (string.IsNullOrWhiteSpace(location))
             {
                 location = LIB_ROOT;
             }
 
-            var libFolders = _hostingEnvironment.WebRootFileProvider.GetDirectoryContents(LIB_ROOT).AsParallel()
-                .Where(f => f.IsDirectory && (IsFolderAssetRoot(f) != null));
+            var libFolders = Directory.GetDirectories(_wwwroot).AsParallel()
+                .Where(f => IsFolderAssetRoot(f) != null);
 
             var assets = libFolders.Select(lf => CreateAssetDefinitionFromRoot(lf));
 
-            foreach (var asset in assets)
-            {
-                Add(asset);
-            }
-
-            return this;
+            assets.ForAll(a => Add(a));
         }
 
-        private AssetDefinition CreateAssetDefinitionFromRoot(IFileInfo folder)
+        public void Add(AssetDefinition asset)
+        {
+            if (_definitionDictionary.ContainsKey(asset.ToString()))
+            {
+                return; //asset was detected twice
+            }
+            else
+            {
+                _definitionDictionary.Add(asset.ToString(), asset);
+            }
+        }
+        
+        #region Internals
+        private AssetDefinition CreateAssetDefinitionFromRoot(string folder)
         {
             var type = IsFolderAssetRoot(folder).Value; //no check is needed, since we've filtered out the nulls by now
+            var folderName = Path.GetDirectoryName(folder);
+
             switch (type)
             {
                 case AssetType.Script:
-                    return new AssetDefinition(AssetType.Script, Path.Combine(folder.PhysicalPath, "js"), folder.Name);
+                    return new AssetDefinition(AssetType.Script, Path.Combine(folder, "js"), folderName);
                 case AssetType.Stylesheet:
-                    return new AssetDefinition(AssetType.Stylesheet, Path.Combine(folder.PhysicalPath, "css"), folder.Name);
+                    return new AssetDefinition(AssetType.Stylesheet, Path.Combine(folder, "css"), folderName);
                 case AssetType.Library:
-                    return new AssetDefinition(AssetType.Script, folder.PhysicalPath, folder.Name);
+                    if (Directory.GetDirectories(folder).Any(d => d.Equals("dist", StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        return new AssetDefinition(AssetType.Library, Path.Combine(folder, "dist"), folderName);
+                    }
+                    else
+                    {
+                        return new AssetDefinition(AssetType.Library, folder, folderName);
+                    }
                 default:
                     throw new InvalidOperationException("This should never happen unless we've created asset types that aren't handled yet.");
             }
         }
 
-        private AssetType? IsFolderAssetRoot(IFileInfo folder)
+        internal void ResolveLibraries()
         {
-            if (!folder.IsDirectory)
+            var libraries = _definitionDictionary.Values.Where(v => v.AssetType == AssetType.Library).AsParallel();
+
+            void ResolveLibrary(AssetDefinition library)
+            {
+                var foldersInLibrary = Directory.GetDirectories(library.AssetLocation);
+
+                var cssFolder = foldersInLibrary.SingleOrDefault(f => f.Equals("css", StringComparison.InvariantCultureIgnoreCase));
+                var jsFolder = foldersInLibrary.SingleOrDefault(f => f.Equals("js", StringComparison.InvariantCultureIgnoreCase));
+
+                if (cssFolder != null)
+                {
+                    AddStylesheet(library.AssetName, cssFolder);
+                }
+
+                if (jsFolder != null)
+                {
+                    AddScript(library.AssetName, jsFolder);
+                }
+
+                _definitionDictionary.Remove(library.ToString());
+            }
+
+            libraries.ForAll(ResolveLibrary);
+        }
+
+        private AssetType? IsFolderAssetRoot(string folder)
+        {
+            if (!Directory.Exists(folder))
                 return null;
 
-            var subfolders = Directory.GetDirectories(folder.PhysicalPath);
+            var subfolders = Directory.GetDirectories(folder);
 
             if (subfolders.Any(sf => sf.Equals("dist", StringComparison.InvariantCultureIgnoreCase))) //we have a dist folder, so it is certainly a library
             {
                 return AssetType.Library;
-            } else if (subfolders.Any(sf => sf.Equals("js",StringComparison.InvariantCultureIgnoreCase)))
+            }
+            else if (subfolders.Any(sf => sf.Equals("js", StringComparison.InvariantCultureIgnoreCase)))
             {
                 return AssetType.Script;
-            } else if (subfolders.Any(sf => sf.Equals("css", StringComparison.InvariantCultureIgnoreCase)))
+            }
+            else if (subfolders.Any(sf => sf.Equals("css", StringComparison.InvariantCultureIgnoreCase)))
             {
                 return AssetType.Stylesheet;
             }
 
             return null;
         }
-
-        public AssetStoreConfiguration Add(AssetDefinition asset)
-        {
-            if (_definitionDictionary.ContainsKey(asset.ToString()))
-            {
-                return this; //asset was detected twice
-            }
-            else
-            {
-                _definitionDictionary.Add(asset.ToString(), asset);
-            }
-            return this;
-        }
-
-
+        #endregion
     }
 }
