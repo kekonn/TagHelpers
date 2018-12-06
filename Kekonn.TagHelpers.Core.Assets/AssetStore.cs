@@ -17,7 +17,7 @@ namespace Kekonn.TagHelpers.Core.Assets
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
 
-            if (_config.PerformScanPostConfigure) return; //we're out at this point, we'll do the rest after c onfigure
+            if (_config.PerformScanPostConfigure) return; //we're out at this point, we'll do the rest after configure
 
             _config.ResolveLibraries();
             _assets = new List<AssetDefinition>(_config.Assets);
